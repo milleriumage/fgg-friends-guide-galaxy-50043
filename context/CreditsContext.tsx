@@ -248,6 +248,31 @@ export const CreditsProvider: React.FC<{ children: ReactNode }> = ({ children })
           }));
         }
 
+        // Load user subscription from Supabase
+        const { data: subscription } = await supabase
+          .from('user_subscriptions')
+          .select('*, subscription_plans(*)')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (subscription && subscription.subscription_plans) {
+          const plan = subscription.subscription_plans as any;
+          const userSub: UserSubscription = {
+            id: plan.id,
+            name: plan.name,
+            price: parseFloat(plan.price),
+            credits: plan.credits,
+            currency: plan.currency || 'USD',
+            features: plan.features || [],
+            renewsOn: subscription.renews_on,
+            paymentMethod: 'Stripe'
+          };
+          setSubscriptions(prev => ({ ...prev, [userId]: userSub }));
+        } else {
+          setSubscriptions(prev => ({ ...prev, [userId]: null }));
+        }
+
         // Load all content items from Supabase with media
         const { data: items } = await supabase
           .from('content_items')
@@ -375,6 +400,31 @@ export const CreditsProvider: React.FC<{ children: ReactNode }> = ({ children })
             ...prev,
             [userId]: unlockedContent.map(item => item.content_item_id)
           }));
+        }
+
+        // Load user subscription from Supabase
+        const { data: subscription } = await supabase
+          .from('user_subscriptions')
+          .select('*, subscription_plans(*)')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (subscription && subscription.subscription_plans) {
+          const plan = subscription.subscription_plans as any;
+          const userSub: UserSubscription = {
+            id: plan.id,
+            name: plan.name,
+            price: parseFloat(plan.price),
+            credits: plan.credits,
+            currency: plan.currency || 'USD',
+            features: plan.features || [],
+            renewsOn: subscription.renews_on,
+            paymentMethod: 'Stripe'
+          };
+          setSubscriptions(prev => ({ ...prev, [userId]: userSub }));
+        } else {
+          setSubscriptions(prev => ({ ...prev, [userId]: null }));
         }
 
         // Load all content items from Supabase with media
@@ -764,14 +814,31 @@ export const CreditsProvider: React.FC<{ children: ReactNode }> = ({ children })
     addCredits(plan.credits, `Subscription credits for ${plan.name} plan`, TransactionType.SUBSCRIPTION);
   }, [addCredits, currentUser]);
 
-  const cancelSubscription = useCallback(() => {
-    if (userSubscription && currentUser) {
-        addTransaction({ type: TransactionType.SUBSCRIPTION, amount: 0, description: `Canceled ${userSubscription.name} plan` });
-        setSubscriptions(prev => {
-            const newSubs = {...prev};
-            delete newSubs[currentUser.id];
-            return newSubs;
-        });
+  const cancelSubscription = useCallback(async () => {
+    if (!userSubscription || !currentUser) return;
+
+    try {
+      const { error } = await supabase.functions.invoke('cancel-stripe-subscription');
+      
+      if (error) {
+        console.error('Error canceling subscription:', error);
+        throw error;
+      }
+
+      // Update local state
+      setSubscriptions(prev => ({
+        ...prev,
+        [currentUser.id]: null
+      }));
+
+      addTransaction({ 
+        type: TransactionType.SUBSCRIPTION, 
+        amount: 0, 
+        description: `Canceled ${userSubscription.name} plan` 
+      });
+    } catch (error) {
+      console.error('Failed to cancel subscription:', error);
+      throw error;
     }
   }, [userSubscription, currentUser]);
 

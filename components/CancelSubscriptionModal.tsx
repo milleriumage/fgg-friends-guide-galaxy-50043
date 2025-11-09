@@ -10,16 +10,20 @@ interface CancelSubscriptionModalProps {
 const CancelSubscriptionModal: React.FC<CancelSubscriptionModalProps> = ({ onClose, onSuccess }) => {
     const { userSubscription, cancelSubscription } = useCredits();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            cancelSubscription();
-            setIsLoading(false);
+        setError(null);
+        try {
+            await cancelSubscription();
             onSuccess();
             onClose();
-        }, 1500);
+        } catch (err) {
+            console.error('Error canceling subscription:', err);
+            setError('Failed to cancel subscription. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     if (!userSubscription) return null;
@@ -31,6 +35,12 @@ const CancelSubscriptionModal: React.FC<CancelSubscriptionModalProps> = ({ onClo
         <p className="text-neutral-300 mb-6">
           Are you sure you want to cancel your <span className="font-semibold text-white">{userSubscription.name}</span> plan? Your benefits will remain active until the end of the current billing period.
         </p>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-accent-red/20 border border-accent-red rounded-lg">
+            <p className="text-accent-red text-sm">{error}</p>
+          </div>
+        )}
         
         <div className="flex flex-col space-y-3">
           <button 
