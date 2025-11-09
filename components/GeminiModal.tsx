@@ -5,7 +5,7 @@ interface GeminiModalProps {
   onClose: () => void;
 }
 
-const GeminiIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.13 2.69a2 2 0 0 0-1.05.51l-6.85 6.85a2 2 0 0 0 0 2.82l6.85 6.85a2 2 0 0 0 2.82 0l6.85-6.85a2 2 0 0 0 0-2.82l-6.85-6.85a2 2 0 0 0-1.77-.51z"/><path d="m14.28 15.6-3.3-3.3a4.24 4.24 0 0 0 0-6l3.3-3.3"/></svg>;
+const GeminiIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.13 2.69a2 2 0 0 0-1.05.51l-6.85 6.85a2 2 0 0 0 0 2.82l6.85 6.85a2 2 0 0 0 2.82 0l6.85-6.85a2 2 0 0 0 0-2.82l-6.85-6.85a2 2 0 0 0-1.77-.51z"/><path d="m14.28 15.6-3.3-3.3a4.24 4.24 0 0 0 0-6l3.3-3.3"/></svg>;
 
 const ImprovementResponse = () => (
     <div className="prose prose-invert prose-sm text-neutral-300 space-y-2">
