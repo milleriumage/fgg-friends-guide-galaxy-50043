@@ -37,21 +37,39 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { type, packageId, planId } = await req.json();
+    const { type, packageId, planId, stripeProductId } = await req.json();
 
-    console.log(`Creating Stripe checkout for user ${user.id}, type: ${type}, packageId: ${packageId}, planId: ${planId}`);
+    console.log(`Creating Stripe checkout for user ${user.id}, type: ${type}, packageId: ${packageId}, planId: ${planId}, stripeProductId: ${stripeProductId}`);
 
     let sessionParams: Stripe.Checkout.SessionCreateParams;
 
     if (type === 'credit_package') {
-      // Get credit package details
-      const { data: pkg, error: pkgError } = await supabase
-        .from('credit_packages')
-        .select('*')
-        .eq('id', packageId)
-        .single();
+      // Get credit package details - try by stripe_product_id first, then by id
+      let pkg, pkgError;
+      
+      if (stripeProductId) {
+        const result = await supabase
+          .from('credit_packages')
+          .select('*')
+          .eq('stripe_product_id', stripeProductId)
+          .maybeSingle();
+        pkg = result.data;
+        pkgError = result.error;
+      }
+      
+      // Fallback to ID if stripe_product_id not provided or not found
+      if (!pkg && packageId) {
+        const result = await supabase
+          .from('credit_packages')
+          .select('*')
+          .eq('id', packageId)
+          .maybeSingle();
+        pkg = result.data;
+        pkgError = result.error;
+      }
 
       if (pkgError || !pkg) {
+        console.error('Package lookup error:', pkgError);
         throw new Error('Credit package not found');
       }
 
@@ -80,14 +98,32 @@ serve(async (req) => {
         },
       };
     } else if (type === 'subscription') {
-      // Get subscription plan details
-      const { data: plan, error: planError } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .eq('id', planId)
-        .single();
+      // Get subscription plan details - try by stripe_product_id first, then by id
+      let plan, planError;
+      
+      if (stripeProductId) {
+        const result = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('stripe_product_id', stripeProductId)
+          .maybeSingle();
+        plan = result.data;
+        planError = result.error;
+      }
+      
+      // Fallback to ID if stripe_product_id not provided or not found
+      if (!plan && planId) {
+        const result = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('id', planId)
+          .maybeSingle();
+        plan = result.data;
+        planError = result.error;
+      }
 
       if (planError || !plan) {
+        console.error('Plan lookup error:', planError);
         throw new Error('Subscription plan not found');
       }
 

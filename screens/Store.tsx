@@ -56,12 +56,13 @@ const Store: React.FC<{ navigate: (screen: Screen) => void; }> = ({ navigate }) 
                 return;
             }
 
-            const response = await supabase.functions.invoke('create-stripe-checkout', {
-                body: { 
-                    type: 'credit_package',
-                    packageId: pkg.id
-                }
-            });
+        const response = await supabase.functions.invoke('create-stripe-checkout', {
+            body: { 
+                type: 'credit_package',
+                packageId: pkg.id,
+                stripeProductId: pkg.stripeProductId
+            }
+        });
 
             if (response.error) {
                 throw response.error;
