@@ -117,9 +117,11 @@ const CreateContent: React.FC<CreateContentProps> = ({ navigate }) => {
 
             const uploadedMedia = await Promise.all([...imageUploadPromises, ...videoUploadPromises]);
 
-            // Get first image URL (browser will resize via CSS)
+            // Create thumbnail URL with transformation
             const firstImageUrl = uploadedMedia.find(m => m.type === 'image')?.url || `https://picsum.photos/seed/${contentId}/600/800`;
-            const thumbnailUrl = firstImageUrl;
+            const thumbnailUrl = firstImageUrl.includes('supabase') 
+                ? `${firstImageUrl}?width=400&height=600&quality=80`
+                : firstImageUrl;
 
             // Create content item
             const newItem: ContentItem = {

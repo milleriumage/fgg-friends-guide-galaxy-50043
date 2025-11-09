@@ -43,7 +43,7 @@ const Feed: React.FC<FeedProps> = ({ items, onUnlockClick }) => {
                                         className="w-full bg-neutral-700 border-neutral-600 rounded-full py-2 px-4 text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary"
                                     />
                                     <button className="ml-2 p-2 rounded-full bg-brand-primary text-white hover:bg-brand-secondary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="h-5 w-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                     </button>
                                 </div>
                             </div>
